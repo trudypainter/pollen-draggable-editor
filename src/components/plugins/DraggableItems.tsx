@@ -22,7 +22,7 @@ const ComponentWrapper: React.FC<NodeViewProps> = ({ editor, node }) => {
   // const [isHovering, hoverProps] = useHover();
   return (
     <NodeViewWrapper
-      className={`draggable-item group ${
+      className={`draggable-item group flex space-x-2 ${
         node.attrs.nestedParentType === "listItem" ? "m-0 p-0" : ""
       }`}
     >
@@ -42,14 +42,12 @@ const ComponentWrapper: React.FC<NodeViewProps> = ({ editor, node }) => {
             }[node.type.name],
           }}
           data-drag-handle
-        ></div>
+        >
+          <div className="">::</div>
+        </div>
       )}
       <NodeViewContent
-        className={`content m-0 p-0 ${
-          node.type.name === "orderedList" || node.type.name === "bulletList"
-            ? "pl-5"
-            : ""
-        }`}
+        className={`content m-0 p-0 $`}
         as={
           {
             heading: "h1",

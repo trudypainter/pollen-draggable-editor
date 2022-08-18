@@ -48,11 +48,7 @@ import { Placeholder } from "./plugins/Placeholder";
 import { SlashCommands } from "./plugins/SlashCommands";
 import { TrailingNode } from "./plugins/TrailingNode";
 
-const CustomDocument = Document.extend({
-  content: "dBlock+",
-});
-
-const rteClass =
+export const rteClass =
   "prose !bg-transparent dark:prose-invert max-w-[calc(100%+2rem)] focus:outline-none -ml-8 pb-4 pt-2 " +
   "prose-pre:!bg-gray-900 prose-pre:border dark:prose-pre:border-gray-800 dark:prose-code:bg-gray-900 dark:prose-code:border-gray-700 dark:prose-code:text-gray-400 prose-code:bg-gray-100 dark:bg-gray-800 prose-code:font-medium prose-code:font-mono prose-code:rounded-lg prose-code:px-1.5 prose-code:py-0.5 prose-code:border prose-code:text-gray-500 " +
   "prose-blockquote:border-l-2 prose-blockquote:pl-4 prose-blockquote:text-gray-400 prose-blockquote:not-italic " +
@@ -69,32 +65,81 @@ const topLevelElements = [
 
 interface RichTextEditorProps {
   // draft?: InferQueryOutput<"drafts.byId">;
-  draft?: {
-    content: string;
-  };
 }
 
-//
+export const viewOnlyExtensions = [
+  Underline,
+  Highlight.configure({ multicolor: true }),
+  StarterKit.configure({ codeBlock: false }),
+];
 
 export const Tiptap: React.FC<RichTextEditorProps> = () => {
+  // const [{}, _, { setValue }] = useField("content");
   const editor = useEditor({
     extensions: [
+      // Math,
+      // for the time being until https://github.com/benrbray/prosemirror-math/issues/43 is fixed
       Underline,
       Highlight.configure({ multicolor: true }),
       StarterKit.configure({
         dropcursor: false,
-        // paragraph: false,
-        // heading: false,
-        // blockquote: false,
-        // bulletList: false,
-        // orderedList: false,
-        // horizontalRule: false,
-        // codeBlock: false,
+        paragraph: false,
+        heading: false,
+        blockquote: false,
+        bulletList: false,
+        orderedList: false,
+        horizontalRule: false,
+        codeBlock: false,
       }),
       Placeholder.configure({ placeholder: "Type '/' for commands" }),
       // Focus.configure({ className: "has-focus", mode: "shallowest" }),
       Dropcursor.configure({ width: 3, color: "#68cef8" }),
       SlashCommands,
+      Extension.create({
+        priority: 10000,
+        addGlobalAttributes() {
+          return [
+            {
+              types: topLevelElements,
+              attributes: {
+                topLevel: {
+                  default: false,
+                  rendered: false,
+                  keepOnSplit: false,
+                },
+                nestedParentType: {
+                  default: null,
+                  rendered: false,
+                  keepOnSplit: true,
+                },
+              },
+            },
+          ];
+        },
+        addProseMirrorPlugins() {
+          return [
+            new Plugin({
+              appendTransaction: (_transactions, oldState, newState) => {
+                if (newState.doc === oldState.doc) {
+                  return;
+                }
+                const tr = newState.tr;
+                newState.doc.descendants((node, pos, parent) => {
+                  if (topLevelElements.includes(node.type.name)) {
+                    tr.setNodeMarkup(pos, null, {
+                      topLevel: parent === newState.doc,
+                      nestedParentType: parent?.type.name,
+                    });
+                  }
+                });
+                return tr;
+              },
+            }),
+          ];
+        },
+      }),
+      TrailingNode,
+      ...DraggableItems,
     ],
     onCreate: ({ editor: e }) => {
       e.state.doc.descendants((node, pos, parent) => {
@@ -109,7 +154,7 @@ export const Tiptap: React.FC<RichTextEditorProps> = () => {
       });
     },
     // onUpdate: ({ editor: e }) => setValue(e.getJSON()),
-    content: "test",
+    content: "poop",
     editorProps: {
       attributes: {
         spellcheck: "false",
@@ -118,21 +163,18 @@ export const Tiptap: React.FC<RichTextEditorProps> = () => {
     },
   });
 
-  const addImage = () => {
-    let url = window.prompt("URL");
+  // useEffect(() => {
+  //   if (editor && editor.getJSON() !== draft?.content) {
+  //     !editor.isDestroyed &&
+  //       editor.commands.setContent((draft?.content || null) as Content);
+  //   }
+  // }, [draft?.content, editor]);
 
-    if (!url) {
-      url = "";
-    }
-    // editor
-    //   .chain()
-    //   .insertContent(`<img src="${url}"/>`)
-    //   .lift("image")
-    //   .insertContent("<p></p>")
-    //   .focus("end")
-    //   .run();
-    console.log("boom");
-  };
+  // useEffect(() => {
+  //   return () => {
+  //     editor?.destroy();
+  //   };
+  // }, [editor]);
 
   return (
     <>
@@ -197,7 +239,8 @@ export const Tiptap: React.FC<RichTextEditorProps> = () => {
           <button className="p-4 bg-red-100 border rounded-lg border-red-200" /> */}
         </BubbleMenu>
       )}
-      <EditorContent editor={editor} />{" "}
+      {/* <pre>{JSON.stringify(editor?.state.doc, null, 2)}</pre> */}
+      <EditorContent editor={editor} />
     </>
   );
 };

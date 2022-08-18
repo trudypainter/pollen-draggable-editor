@@ -63,8 +63,8 @@ export const viewOnlyExtensions = [
   }),
 ];
 
-export const RichTextEditor: React.FC<RichTextEditorProps> = ({ draft }) => {
-  const [{}, _, { setValue }] = useField("content");
+export const RichTextEditor: React.FC<RichTextEditorProps> = () => {
+  // const [{}, _, { setValue }] = useField("content");
   const editor = useEditor({
     extensions: [
       // Math,
@@ -143,8 +143,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ draft }) => {
         }
       });
     },
-    onUpdate: ({ editor: e }) => setValue(e.getJSON()),
-    content: draft?.content as Content,
+    // onUpdate: ({ editor: e }) => setValue(e.getJSON()),
+    content: "test",
     editorProps: {
       attributes: {
         spellcheck: "false",
