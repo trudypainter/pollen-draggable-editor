@@ -23,8 +23,8 @@ const ComponentWrapper: React.FC<NodeViewProps> = ({ editor, node }) => {
   console.log("**** ", node.type.name);
 
   const typeStyle = {
-    heading: "text-3xl pt-12",
-    paragraph: "text-xl",
+    heading: "text-3xl pt-12 bg-blue-100",
+    paragraph: "text-xl bg-green-100",
     // blockquote: "blockquote",
     // orderedList: "ol",
     // bulletList: "ul",
@@ -34,7 +34,7 @@ const ComponentWrapper: React.FC<NodeViewProps> = ({ editor, node }) => {
 
   return (
     <NodeViewWrapper
-      className={`draggable-item group flex space-x-2 ${
+      className={`draggable-item group flex space-x-2 bg-yellow-100 ${
         node.attrs.nestedParentType === "listItem" ? "m-0 p-0" : ""
       }`}
     >
