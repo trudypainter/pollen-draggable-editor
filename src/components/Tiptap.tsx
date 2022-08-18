@@ -1,15 +1,26 @@
-import Dropcursor from "@tiptap/extension-dropcursor";
-import Highlight from "@tiptap/extension-highlight";
 import {
   BubbleMenu,
-  Content,
+  // Content,
   EditorContent,
   Extension,
   useEditor,
+  Content,
 } from "@tiptap/react";
+import Dropcursor from "@tiptap/extension-dropcursor";
+import Highlight from "@tiptap/extension-highlight";
+import Paragraph from "@tiptap/extension-paragraph";
+
+// import FloatingMenu from "@tiptap/extension-floating-menu";
 import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
+import Image from "@tiptap/extension-image";
+// import getSuggestionItems from "./suggestion/items";
+// import renderItems from "./suggestion/renderItems";
 import { Plugin } from "prosemirror-state";
-import React, { useEffect } from "react";
+
+import Document from "@tiptap/extension-document";
+import { DBlock } from "./dBlock";
+// import "./Tiptap.css";
 
 import {
   IconBold,
@@ -19,18 +30,29 @@ import {
   IconStrikethrough,
   IconUnderline,
 } from "@tabler/icons";
-import Underline from "@tiptap/extension-underline";
-// import { useField } from "formik";
 
-// import { InferQueryOutput } from "../../lib/trpc";
+// doc (
+//   dBlock(
+//     block(paragraph|heading|blockquote)
+//   )
+//   dBlock(
+//     block(paragraph|heading|blockquote)
+//   )
+//   dBlock(
+//     block(paragraph|heading|blockquote)
+//   )
+// )
+
 import { DraggableItems } from "./plugins/DraggableItems";
 import { Placeholder } from "./plugins/Placeholder";
 import { SlashCommands } from "./plugins/SlashCommands";
 import { TrailingNode } from "./plugins/TrailingNode";
-import { lowlight } from "lowlight/lib/common.js";
-import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 
-export const rteClass =
+const CustomDocument = Document.extend({
+  content: "dBlock+",
+});
+
+const rteClass =
   "prose !bg-transparent dark:prose-invert max-w-[calc(100%+2rem)] focus:outline-none -ml-8 pb-4 pt-2 " +
   "prose-pre:!bg-gray-900 prose-pre:border dark:prose-pre:border-gray-800 dark:prose-code:bg-gray-900 dark:prose-code:border-gray-700 dark:prose-code:text-gray-400 prose-code:bg-gray-100 dark:bg-gray-800 prose-code:font-medium prose-code:font-mono prose-code:rounded-lg prose-code:px-1.5 prose-code:py-0.5 prose-code:border prose-code:text-gray-500 " +
   "prose-blockquote:border-l-2 prose-blockquote:pl-4 prose-blockquote:text-gray-400 prose-blockquote:not-italic " +
@@ -52,84 +74,27 @@ interface RichTextEditorProps {
   };
 }
 
-export const viewOnlyExtensions = [
-  Underline,
-  Highlight.configure({ multicolor: true }),
-  StarterKit.configure({ codeBlock: false }),
-  CodeBlockLowlight.extend({
-    addOptions() {
-      return { ...this.parent?.(), lowlight };
-    },
-  }),
-];
+//
 
-export const RichTextEditor: React.FC<RichTextEditorProps> = ({ draft }) => {
-  const [{}, _, { setValue }] = useField("content");
+export const Tiptap: React.FC<RichTextEditorProps> = () => {
   const editor = useEditor({
     extensions: [
-      // Math,
-      // for the time being until https://github.com/benrbray/prosemirror-math/issues/43 is fixed
       Underline,
       Highlight.configure({ multicolor: true }),
       StarterKit.configure({
         dropcursor: false,
-        paragraph: false,
-        heading: false,
-        blockquote: false,
-        bulletList: false,
-        orderedList: false,
-        horizontalRule: false,
-        codeBlock: false,
+        // paragraph: false,
+        // heading: false,
+        // blockquote: false,
+        // bulletList: false,
+        // orderedList: false,
+        // horizontalRule: false,
+        // codeBlock: false,
       }),
       Placeholder.configure({ placeholder: "Type '/' for commands" }),
       // Focus.configure({ className: "has-focus", mode: "shallowest" }),
       Dropcursor.configure({ width: 3, color: "#68cef8" }),
       SlashCommands,
-      Extension.create({
-        priority: 10000,
-        addGlobalAttributes() {
-          return [
-            {
-              types: topLevelElements,
-              attributes: {
-                topLevel: {
-                  default: false,
-                  rendered: false,
-                  keepOnSplit: false,
-                },
-                nestedParentType: {
-                  default: null,
-                  rendered: false,
-                  keepOnSplit: true,
-                },
-              },
-            },
-          ];
-        },
-        addProseMirrorPlugins() {
-          return [
-            new Plugin({
-              appendTransaction: (_transactions, oldState, newState) => {
-                if (newState.doc === oldState.doc) {
-                  return;
-                }
-                const tr = newState.tr;
-                newState.doc.descendants((node, pos, parent) => {
-                  if (topLevelElements.includes(node.type.name)) {
-                    tr.setNodeMarkup(pos, null, {
-                      topLevel: parent === newState.doc,
-                      nestedParentType: parent?.type.name,
-                    });
-                  }
-                });
-                return tr;
-              },
-            }),
-          ];
-        },
-      }),
-      TrailingNode,
-      ...DraggableItems,
     ],
     onCreate: ({ editor: e }) => {
       e.state.doc.descendants((node, pos, parent) => {
@@ -143,8 +108,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ draft }) => {
         }
       });
     },
-    onUpdate: ({ editor: e }) => setValue(e.getJSON()),
-    content: draft?.content as Content,
+    // onUpdate: ({ editor: e }) => setValue(e.getJSON()),
+    content: "test",
     editorProps: {
       attributes: {
         spellcheck: "false",
@@ -153,18 +118,21 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ draft }) => {
     },
   });
 
-  // useEffect(() => {
-  //   if (editor) {
-  //     !editor.isDestroyed &&
-  //       editor.commands.setContent((draft?.content || null) as Content);
-  //   }
-  // }, [draft?.content, editor]);
+  const addImage = () => {
+    let url = window.prompt("URL");
 
-  // useEffect(() => {
-  //   return () => {
-  //     editor?.destroy();
-  //   };
-  // }, [editor]);
+    if (!url) {
+      url = "";
+    }
+    // editor
+    //   .chain()
+    //   .insertContent(`<img src="${url}"/>`)
+    //   .lift("image")
+    //   .insertContent("<p></p>")
+    //   .focus("end")
+    //   .run();
+    console.log("boom");
+  };
 
   return (
     <>
@@ -223,10 +191,13 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ draft }) => {
           >
             <IconHighlight size={16} />
           </button>
+          {/* <button className="p-4 bg-yellow-100 border rounded-lg border-yellow-200" />
+          <button className="p-4 bg-green-100 border rounded-lg border-green-200" />
+          <button className="p-4 bg-blue-100 border rounded-lg border-blue-200" />
+          <button className="p-4 bg-red-100 border rounded-lg border-red-200" /> */}
         </BubbleMenu>
       )}
-      {/* <pre>{JSON.stringify(editor?.state.doc, null, 2)}</pre> */}
-      <EditorContent editor={editor} />
+      <EditorContent editor={editor} />{" "}
     </>
   );
 };

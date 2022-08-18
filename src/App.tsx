@@ -3,7 +3,7 @@ import { Tiptap } from "./components";
 
 function App() {
   return (
-    <div className="App">
+    <div className="w-1/2 m-auto bg-red-100">
       <Tiptap />
       {/* <RichTextEditor /> */}
     </div>
