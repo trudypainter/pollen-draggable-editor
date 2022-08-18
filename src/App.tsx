@@ -3,7 +3,7 @@ import { RichTextEditor } from "./components/RichTextEditor";
 
 function App() {
   return (
-    <div className="w-1/2 m-auto bg-red-100">
+    <div className="w-1/2 m-auto mt-32">
       {/* <Tiptap /> */}
       <RichTextEditor />
     </div>

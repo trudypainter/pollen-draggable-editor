@@ -13,13 +13,25 @@ import {
 import { lowlight } from "lowlight/lib/common.js";
 import { NodeSelection, Plugin, TextSelection } from "prosemirror-state";
 import { dropPoint } from "prosemirror-transform";
+import { IconGridDots } from "@tabler/icons";
 
 function eventCoords(event: MouseEvent) {
   return { left: event.clientX, top: event.clientY };
 }
 
 const ComponentWrapper: React.FC<NodeViewProps> = ({ editor, node }) => {
-  // const [isHovering, hoverProps] = useHover();
+  console.log("**** ", node.type.name);
+
+  const typeStyle = {
+    heading: "text-3xl pt-12",
+    paragraph: "text-xl",
+    // blockquote: "blockquote",
+    // orderedList: "ol",
+    // bulletList: "ul",
+    // codeBlock: "pre",
+  }[node.type.name];
+  console.log(typeStyle);
+
   return (
     <NodeViewWrapper
       className={`draggable-item group flex space-x-2 ${
@@ -33,8 +45,8 @@ const ComponentWrapper: React.FC<NodeViewProps> = ({ editor, node }) => {
           className={`drag-handle group-hover:opacity-100 opacity-0 transition`}
           style={{
             top: {
-              heading: "0.5rem",
-              paragraph: "0.4rem",
+              heading: "2.5rem",
+              paragraph: "0.7rem",
               blockquote: "0.4rem",
               orderedList: "0.8rem",
               bulletList: "0.8rem",
@@ -43,21 +55,23 @@ const ComponentWrapper: React.FC<NodeViewProps> = ({ editor, node }) => {
           }}
           data-drag-handle
         >
-          <div className="">::</div>
+          <div className="flex ">
+            <IconGridDots size={24} />
+          </div>
         </div>
       )}
       <NodeViewContent
-        className={`content m-0 p-0 $`}
-        as={
-          {
-            heading: "h1",
-            paragraph: "p",
-            blockquote: "blockquote",
-            orderedList: "ol",
-            bulletList: "ul",
-            codeBlock: "pre",
-          }[node.type.name]
-        }
+        className={typeStyle}
+        // as={
+        //   {
+        //     heading: "h1",
+        //     paragraph: "p",
+        //     blockquote: "blockquote",
+        //     orderedList: "ol",
+        //     bulletList: "ul",
+        //     codeBlock: "pre",
+        //   }[node.type.name]
+        // }
       />
     </NodeViewWrapper>
   );

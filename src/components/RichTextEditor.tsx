@@ -151,6 +151,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = () => {
         class: rteClass,
       },
     },
+    autofocus: "end",
   });
 
   // useEffect(() => {
